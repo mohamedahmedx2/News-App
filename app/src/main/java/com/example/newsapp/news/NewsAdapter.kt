@@ -1,12 +1,13 @@
-package com.example.newsapp
+package com.example.newsapp.news
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.newsapp.api.model.newsResponse.News
+import com.example.newsapp.R
 import com.example.newsapp.databinding.ItemNewsBinding
+import com.example.newsapp.model.newsResponse.News
 import com.github.marlonlom.utilities.timeago.TimeAgo
 
 class NewsAdapter(var newsList: List<News?>? = null) :

@@ -1,7 +1,8 @@
-package com.example.newsapp.api.model
+package com.example.newsapp.model
 
 import android.util.Log
 import com.example.newsapp.api.WebServices
+import com.example.newsapp.api.interceptors.AuthInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -18,7 +19,10 @@ class ApiManager {
                 Log.e("api", message)
             }
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-            val okHTTPClient = OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
+            val okHTTPClient = OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .addInterceptor(AuthInterceptor())
+                .build()
             if (retrofit == null) {
                 retrofit = Retrofit.Builder()
                     .client(okHTTPClient)

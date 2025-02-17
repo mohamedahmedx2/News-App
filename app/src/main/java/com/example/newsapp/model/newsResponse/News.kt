@@ -1,8 +1,8 @@
-package com.example.newsapp.api.model.newsResponse
+package com.example.newsapp.model.newsResponse
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
-import com.example.newsapp.api.model.sourcesResponse.Source
+import com.example.newsapp.model.sourcesResponse.Source
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat

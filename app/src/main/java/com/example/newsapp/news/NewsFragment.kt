@@ -1,4 +1,4 @@
-package com.example.newsapp
+package com.example.newsapp.news
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -7,13 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import com.example.newsapp.api.model.ApiManager
-import com.example.newsapp.api.model.ErrorResponse
-import com.example.newsapp.api.model.newsResponse.News
-import com.example.newsapp.api.model.newsResponse.NewsResponse
-import com.example.newsapp.api.model.sourcesResponse.Source
-import com.example.newsapp.api.model.sourcesResponse.SourcesResponse
 import com.example.newsapp.databinding.FragmentNewsBinding
+import com.example.newsapp.model.ApiManager
+import com.example.newsapp.model.Category
+import com.example.newsapp.model.ErrorResponse
+import com.example.newsapp.model.newsResponse.News
+import com.example.newsapp.model.newsResponse.NewsResponse
+import com.example.newsapp.model.sourcesResponse.Source
+import com.example.newsapp.model.sourcesResponse.SourcesResponse
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.gson.Gson
@@ -25,6 +26,16 @@ import retrofit2.Response
 lateinit var viewBinding: FragmentNewsBinding
 
 class NewsFragment : Fragment() {
+
+    companion object {
+        fun getInstance(category: Category): NewsFragment {
+            val fragment = NewsFragment()
+            fragment.category = category
+            return fragment
+        }
+    }
+
+    lateinit var category: Category
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,7 +60,7 @@ class NewsFragment : Fragment() {
 
     private fun loadSources() {
         showLoading()
-        ApiManager.wedServices().getSources()
+        ApiManager.wedServices().getSources(category.id)
             .enqueue(object : Callback<SourcesResponse> {
                 override fun onResponse(
                     call: Call<SourcesResponse>,
