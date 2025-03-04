@@ -24,6 +24,7 @@ import retrofit2.Response
 
 @SuppressLint("StaticFieldLeak")
 lateinit var viewBinding: FragmentNewsBinding
+//lateinit var binding: AppBarActivityHomeBinding
 
 class NewsFragment : Fragment() {
 
@@ -51,12 +52,15 @@ class NewsFragment : Fragment() {
 
         initViews()
         loadSources()
+
     }
 
+    @SuppressLint("ShowToast")
     private fun initViews() {
         viewBinding.newsRecyclerview.adapter = adapter
 
     }
+
 
     private fun loadSources() {
         showLoading()
@@ -122,6 +126,8 @@ class NewsFragment : Fragment() {
             }
         )
         viewBinding.sourcesTabs.getTabAt(0)?.select()
+
+
     }
 
     private fun loadNews(sourceId: String) {
@@ -166,6 +172,41 @@ class NewsFragment : Fragment() {
         adapter.changeData(newsList)
     }
 
+//    fun loadSearchNews(search: String) {
+//        ApiManager.wedServices().getSearchNews(search)
+//            .enqueue(object : Callback<NewsResponse> {
+//            override fun onResponse(
+//                call: Call<NewsResponse>,
+//                response: Response<NewsResponse>
+//            ) {
+//                if (!response.isSuccessful) {
+//                    val errorResponse = Gson().fromJson(
+//                        response.errorBody()?.string(),
+//                        ErrorResponse::class.java
+//
+//                    )
+//                    val message = errorResponse.message ?: "Something went Wrong"
+//                    showErrorView(message,
+//                        onTryAgainClick = {
+//                            loadSearchNews(search)
+//                        })
+//                    return
+//                }
+//                showSuccessView()
+//                bindNewsList(response.body()?.newsList)
+//            }
+//
+//            override fun onFailure(call: Call<NewsResponse>, throwable: Throwable) {
+//                showErrorView(throwable.localizedMessage ?: "Something went wrong",
+//                    onTryAgainClick = {
+//                        loadSearchNews(search)
+//                    }
+//                )
+//            }
+//
+//        })
+//    }
+
     fun showLoading() {
         viewBinding.loadingView.isVisible = true
         viewBinding.errorView.isVisible = false
@@ -184,6 +225,7 @@ class NewsFragment : Fragment() {
             onTryAgainClick.invoke()
         }
     }
+
 
 }
 

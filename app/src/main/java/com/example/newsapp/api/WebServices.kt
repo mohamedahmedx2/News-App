@@ -19,4 +19,9 @@ interface WebServices {
         @Query("sources") source: String,
     ): Call<NewsResponse>
 
+    @GET("v2/everything")
+    fun getSearchNews(
+        @Query("q") query: String,
+    ): Call<NewsResponse>
+
 }
