@@ -1,8 +1,10 @@
 package com.example.newsapp.news
 
+import NewsBottomSheetFragment
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.newsapp.R
@@ -10,9 +12,12 @@ import com.example.newsapp.databinding.ItemNewsBinding
 import com.example.newsapp.model.newsResponse.News
 import com.github.marlonlom.utilities.timeago.TimeAgo
 
-class NewsAdapter(var newsList: List<News?>? = null) :
-    RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
 
+class NewsAdapter(
+    var newsList: List<News?>? = null
+) :
+
+    RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -30,6 +35,15 @@ class NewsAdapter(var newsList: List<News?>? = null) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         holder.bind(newsList?.get(position))
+
+        /// holder.itemView
+        holder.binding.cardItem.setOnClickListener {
+            val newsItem = newsList?.get(position)
+            newsItem?.let { it1 -> NewsBottomSheetFragment(it1) }
+                ?.show((it.context as AppCompatActivity).supportFragmentManager, "NewsBottomSheet")
+        }
+
+
     }
 
     class ViewHolder(val binding: ItemNewsBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -48,9 +62,17 @@ class NewsAdapter(var newsList: List<News?>? = null) :
         }
     }
 
+
     @SuppressLint("NotifyDataSetChanged")
     fun changeData(newList: List<News?>?) {
         this.newsList = newList
         notifyDataSetChanged()
     }
+
+
+//    @SuppressLint("NotifyDataSetChanged")
+//    fun updateNews(newList: List<News>) {
+//        newsList = newList
+//        notifyDataSetChanged()
+//    }
 }
