@@ -1,3 +1,5 @@
+package com.example.newsapp
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
@@ -6,10 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.example.newsapp.R
-import com.example.newsapp.WebViewActivity
+import com.example.domain.model.News
 import com.example.newsapp.databinding.ActivityBottomSheetNewsBinding
-import com.example.newsapp.model.newsResponse.News
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class NewsBottomSheetFragment(private val newsItem: News) : BottomSheetDialogFragment() {

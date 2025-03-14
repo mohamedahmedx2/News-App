@@ -1,20 +1,19 @@
 package com.example.newsapp.news
 
-import NewsBottomSheetFragment
 import android.annotation.SuppressLint
+import android.content.ContextWrapper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.example.newsapp.R
+import com.example.domain.model.News
+import com.example.newsapp.NewsBottomSheetFragment
 import com.example.newsapp.databinding.ItemNewsBinding
-import com.example.newsapp.model.newsResponse.News
-import com.github.marlonlom.utilities.timeago.TimeAgo
 
 
 class NewsAdapter(
-    var newsList: List<News?>? = null
+    var newsList: List<News?>? = null,
 ) :
 
     RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
@@ -37,11 +36,31 @@ class NewsAdapter(
         holder.bind(newsList?.get(position))
 
         /// holder.itemView
+//        holder.binding.cardItem.setOnClickListener {
+//            val newsItem = newsList?.get(position)
+//            newsItem?.let { it1 -> NewsBottomSheetFragment(it1) }
+//                ?.show((it.context as AppCompatActivity).supportFragmentManager, "NewsBottomSheet")
+//        }
+
+
         holder.binding.cardItem.setOnClickListener {
             val newsItem = newsList?.get(position)
-            newsItem?.let { it1 -> NewsBottomSheetFragment(it1) }
-                ?.show((it.context as AppCompatActivity).supportFragmentManager, "NewsBottomSheet")
+            val context = it.context
+            val activity = when (context) {
+                is AppCompatActivity -> context
+                is ContextWrapper -> context.baseContext as? AppCompatActivity
+                else -> null
+            }
+
+            if (activity != null && newsItem != null) {
+                NewsBottomSheetFragment(newsItem)
+                    .show(activity.supportFragmentManager, "NewsBottomSheet")
+            } else {
+                Log.e("NewsAdapter", "Context is not an AppCompatActivity or newsItem is null")
+            }
         }
+
+
 
 
     }
@@ -49,16 +68,8 @@ class NewsAdapter(
     class ViewHolder(val binding: ItemNewsBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(news: News?) {
-            binding.title.text = news?.title
-            binding.author.text = news?.author
-            binding.date.text = news?.publishedAt
-            Glide.with(binding.root)
-                .load(news?.urlToImage)
-                .error(R.drawable.image_failed)
-                .into(binding.image)
-            /// "2025-02-14T18:47:08Z"
-            val formattedDate = news?.getPublishedAtInMillis()?.let { TimeAgo.using(it) }
-            binding.date.text = formattedDate
+            binding.newsItem = news
+            binding.invalidateAll()
         }
     }
 
@@ -68,11 +79,4 @@ class NewsAdapter(
         this.newsList = newList
         notifyDataSetChanged()
     }
-
-
-//    @SuppressLint("NotifyDataSetChanged")
-//    fun updateNews(newList: List<News>) {
-//        newsList = newList
-//        notifyDataSetChanged()
-//    }
 }

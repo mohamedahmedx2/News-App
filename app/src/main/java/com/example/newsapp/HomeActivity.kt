@@ -15,7 +15,9 @@ import com.example.newsapp.databinding.ActivityHomeBinding
 import com.example.newsapp.model.Category
 import com.example.newsapp.news.NewsFragment
 import com.example.newsapp.search.SearchActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var searchEditText: EditText

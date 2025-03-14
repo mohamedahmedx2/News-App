@@ -21,3 +21,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "NewsApp"
 include(":app")
+include(":Data")
+include(":Domain")
+include(":Api")

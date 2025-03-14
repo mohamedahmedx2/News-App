@@ -18,9 +18,9 @@ data class Category(
         fun getCategories(): List<Category> =
             listOf(
                 Category(
-                    id = "business",
-                    title = R.string.business,
-                    imageRes = R.drawable.cat_business
+                    id = "general",
+                    title = R.string.general,
+                    imageRes = R.drawable.cat_general
                 ),
                 Category(
                     id = "entertainment",
@@ -28,9 +28,9 @@ data class Category(
                     imageRes = R.drawable.cat_intertainment
                 ),
                 Category(
-                    id = "general",
-                    title = R.string.general,
-                    imageRes = R.drawable.cat_general
+                    id = "business",
+                    title = R.string.business,
+                    imageRes = R.drawable.cat_business
                 ),
                 Category(
                     id = "health",
@@ -55,4 +55,3 @@ data class Category(
             )
     }
 }
-

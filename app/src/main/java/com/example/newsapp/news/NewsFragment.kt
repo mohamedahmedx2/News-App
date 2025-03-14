@@ -5,27 +5,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.domain.model.News
+import com.example.domain.model.Source
 import com.example.newsapp.databinding.FragmentNewsBinding
-import com.example.newsapp.model.ApiManager
+import com.example.newsapp.handel.ErrorState
 import com.example.newsapp.model.Category
-import com.example.newsapp.model.ErrorResponse
-import com.example.newsapp.model.newsResponse.News
-import com.example.newsapp.model.newsResponse.NewsResponse
-import com.example.newsapp.model.sourcesResponse.Source
-import com.example.newsapp.model.sourcesResponse.SourcesResponse
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
-import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import dagger.hilt.android.AndroidEntryPoint
 
 @SuppressLint("StaticFieldLeak")
 lateinit var viewBinding: FragmentNewsBinding
 //lateinit var binding: AppBarActivityHomeBinding
 
+@AndroidEntryPoint
 class NewsFragment : Fragment() {
 
     companion object {
@@ -37,6 +35,12 @@ class NewsFragment : Fragment() {
     }
 
     lateinit var category: Category
+    lateinit var viewModel: NewsViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,49 +55,40 @@ class NewsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initViews()
-        loadSources()
+        viewModel.loadSources(categoryId = category.id)
+        observerLiveData()
+    }
 
+    private fun observerLiveData() {
+        viewModel.sourceLiveData.observe(viewLifecycleOwner, Observer { data ->
+            bindTapLayout(data)
+        })
+
+        viewModel.showLoading.observe(viewLifecycleOwner) { isLoading ->
+
+            if (isLoading) {
+                showLoading()
+
+            }
+
+        }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { message ->
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+        viewModel.errorState.observe(viewLifecycleOwner) { state ->
+            showErrorView(state)
+        }
+        viewModel.newsLiveData.observe(viewLifecycleOwner, Observer { data ->
+            showSuccessView()
+            bindNewsList(data)
+        })
     }
 
     @SuppressLint("ShowToast")
     private fun initViews() {
         viewBinding.newsRecyclerview.adapter = adapter
 
-    }
-
-
-    private fun loadSources() {
-        showLoading()
-        ApiManager.wedServices().getSources(category.id)
-            .enqueue(object : Callback<SourcesResponse> {
-                override fun onResponse(
-                    call: Call<SourcesResponse>,
-                    response: Response<SourcesResponse>
-                ) {
-                    if (!response.isSuccessful) {
-                        val errorResponse = Gson().fromJson(
-                            response.errorBody()?.string(),
-                            SourcesResponse::class.java
-                        )
-                        val message = errorResponse.message ?: "Something went Wrong"
-                        showErrorView(message,
-                            onTryAgainClick = {
-                                loadSources()
-                            })
-                        return
-                    }
-                    bindTapLayout(response.body()?.sources)
-                }
-
-                override fun onFailure(call: Call<SourcesResponse>, error: Throwable) {
-                    showErrorView(error.localizedMessage ?: "Something went Wrong",
-                        onTryAgainClick = {
-                            loadSources()
-                        }
-                    )
-                }
-
-            })
     }
 
     private fun bindTapLayout(sources: List<Source?>?) {
@@ -110,7 +105,7 @@ class NewsFragment : Fragment() {
             object : OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     val source = tab?.tag as Source?
-                    source?.id?.let { loadNews(it) }
+                    source?.sourceId?.let { viewModel.loadNews(it) }
 
 
                 }
@@ -120,7 +115,7 @@ class NewsFragment : Fragment() {
 
                 override fun onTabReselected(tab: TabLayout.Tab?) {
                     val source = tab?.tag as Source?
-                    source?.id?.let { loadNews(it) }
+                    source?.sourceId?.let { viewModel.loadNews(it) }
                 }
 
             }
@@ -130,83 +125,11 @@ class NewsFragment : Fragment() {
 
     }
 
-    private fun loadNews(sourceId: String) {
-        showLoading()
-        ApiManager.wedServices().getNews(source = sourceId)
-            .enqueue(object : Callback<NewsResponse> {
-                override fun onResponse(
-                    call: Call<NewsResponse>,
-                    response: Response<NewsResponse>
-                ) {
-                    if (!response.isSuccessful) {
-                        val errorResponse = Gson().fromJson(
-                            response.errorBody()?.string(),
-                            ErrorResponse::class.java
-
-                        )
-                        val message = errorResponse.message ?: "Something went Wrong"
-//                        showErrorView(
-//                            message,
-//                            onTryAgainClick = {
-//                                loadNews(sourceId)
-//                            })
-                        return
-                    }
-                    showSuccessView()
-                    bindNewsList(response.body()?.newsList)
-                }
-
-                override fun onFailure(call: Call<NewsResponse>, throwable: Throwable) {
-                    showErrorView(throwable.localizedMessage ?: "Something went wrong",
-                        onTryAgainClick = {
-                            loadNews(sourceId)
-                        }
-                    )
-                }
-
-            })
-    }
-
     val adapter = NewsAdapter()
     private fun bindNewsList(newsList: List<News?>?) {
         //    adapter.newsList = newsList
         adapter.changeData(newsList)
     }
-
-//    fun loadSearchNews(search: String) {
-//        ApiManager.wedServices().getSearchNews(search)
-//            .enqueue(object : Callback<NewsResponse> {
-//            override fun onResponse(
-//                call: Call<NewsResponse>,
-//                response: Response<NewsResponse>
-//            ) {
-//                if (!response.isSuccessful) {
-//                    val errorResponse = Gson().fromJson(
-//                        response.errorBody()?.string(),
-//                        ErrorResponse::class.java
-//
-//                    )
-//                    val message = errorResponse.message ?: "Something went Wrong"
-//                    showErrorView(message,
-//                        onTryAgainClick = {
-//                            loadSearchNews(search)
-//                        })
-//                    return
-//                }
-//                showSuccessView()
-//                bindNewsList(response.body()?.newsList)
-//            }
-//
-//            override fun onFailure(call: Call<NewsResponse>, throwable: Throwable) {
-//                showErrorView(throwable.localizedMessage ?: "Something went wrong",
-//                    onTryAgainClick = {
-//                        loadSearchNews(search)
-//                    }
-//                )
-//            }
-//
-//        })
-//    }
 
     fun showLoading() {
         viewBinding.loadingView.isVisible = true
@@ -218,12 +141,12 @@ class NewsFragment : Fragment() {
         viewBinding.errorView.isVisible = false
     }
 
-    fun showErrorView(errorMessage: String, onTryAgainClick: () -> Unit) {
+    fun showErrorView(errorState: ErrorState) {
         viewBinding.loadingView.isVisible = false
         viewBinding.errorView.isVisible = true
-        viewBinding.errorMessage.text = errorMessage
+        viewBinding.errorMessage.text = errorState.errorMessenger
         viewBinding.tryAgain.setOnClickListener {
-            onTryAgainClick.invoke()
+            errorState.onRetry?.invoke()
         }
     }
 
